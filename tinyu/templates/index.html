@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>TinyU | Home</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+
+        <nav id="index-nav">
+            <a id="index-link" href="/list">List of all urls</a>
+        </nav>
+
+        <main id="index-main">
+            <h1 id="index-h1"> Welcome to TinyU url shortner</h1>
+            <div id="index-upper-div">
+                <form name="index-form">
+                    <input size="40" required type="input" id="longurl-input" name="longurl" placeholder="Enter url to shorten as https://<text>.<text>">
+                </form>
+                <button id="index-submit" >Submit</button>
+            </div>
+            <div id="index-lower-lower">
+                <h3 id="index-output">------</h3>
+                <button id="index-copybutton">Copy</button>
+            </div>
+        </main>
+
+        <script type="text/javascript">
+            const submitBtn = document.querySelector("#index-submit")
+            const copyBtn = document.querySelector("#index-copybutton")
+            const input = document.querySelector("#longurl-input")
+            const output = document.querySelector("#index-output")
+            const form = document.querySelector("#index-form")
+            let csrftoken = getCookie('csrftoken');
+            let pattern = new RegExp("https://[A-Za-z0-9]+\.[A-Za-z]+")
+
+            submitBtn.addEventListener("click", async () => {
+                
+                if( pattern.test(input.value) ) {
+                    const res = await fetch("/create", {
+                        method: "POST",
+                        credentials: 'same-origin',
+                        body: JSON.stringify({
+                          longURL: input.value,
+                        }),
+                        headers: {
+                          "Content-type": "application/json; charset=UTF-8",
+                          "X-CSRFToken": csrftoken
+                        }
+                    })
+                    const result = await res.json()
+                    output.textContent = result["shortURL"]
+                } else {
+                    alert(`${input.value} is not a valid URL`)
+                }
+            })
+
+            copyBtn.addEventListener("click", () => {
+                navigator.clipboard.writeText(output.textContent)
+                alert("Copied url: " + output.textContent)
+            })
+
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        </script>
+    </body>
+</html>
